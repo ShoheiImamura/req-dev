@@ -1,0 +1,27 @@
+---
+// お客様と詰めたい確認事項 / 認識の相違点
+interface Q { q: string; status: 'open' | 'resolved'; note?: string; asked?: Date }
+interface Props { questions: Q[]; title?: string }
+const { questions, title = '確認事項（認識合わせ）' } = Astro.props;
+const open = questions.filter((q) => q.status === 'open');
+const resolved = questions.filter((q) => q.status === 'resolved');
+---
+{questions.length > 0 && (
+  <section class="questions">
+    <h2>{title} <span class="count">未解決 {open.length} / 全 {questions.length}</span></h2>
+    <ul>
+      {open.map((q) => (
+        <li>
+          <span class="badge open">未解決</span> {q.q}
+          {q.note && <span class="note">↳ {q.note}</span>}
+        </li>
+      ))}
+      {resolved.map((q) => (
+        <li class="resolved">
+          <span class="badge resolved">解決</span> {q.q}
+          {q.note && <span class="note">↳ {q.note}</span>}
+        </li>
+      ))}
+    </ul>
+  </section>
+)}

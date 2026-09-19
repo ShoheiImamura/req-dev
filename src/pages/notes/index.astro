@@ -1,0 +1,32 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+const notes = (await getCollection('notes')).sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const fmt = (d: Date) => d.toISOString().slice(0, 10);
+const groups = [
+  { kind: 'customer', name: 'お客様から受け取った情報' },
+  { kind: 'research', name: 'こちらで調査した情報' },
+];
+---
+<Base title="受領情報・調査メモ">
+  <h1>受領情報・調査メモ</h1>
+  <p>図の根拠になる情報。<code>related</code> にドキュメント id を書くと各図のページからも辿れる。</p>
+  {groups.map((g) => {
+    const ns = notes.filter((n) => n.data.kind === g.kind);
+    return (
+      <section>
+        <h2>{g.name}</h2>
+        {ns.length === 0 && <p class="empty">なし（src/content/notes/ に md を追加）</p>}
+        <div class="cards">
+          {ns.map((n) => (
+            <article class="card">
+              <h3><a href={`/notes/${n.id}`}>{n.data.title}</a></h3>
+              <div class="meta">{fmt(n.data.date)}{n.data.tags.length > 0 && ` · ${n.data.tags.join(', ')}`}</div>
+              {n.data.summary && <p>{n.data.summary}</p>}
+            </article>
+          ))}
+        </div>
+      </section>
+    );
+  })}
+</Base>

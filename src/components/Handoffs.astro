@@ -1,0 +1,60 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { incoming, outgoing, layerName, artifactName } from '../lib/minimal-set';
+
+interface Props {
+  layer: string;
+  artifact: string;
+  docs: CollectionEntry<'docs'>[];
+  currentId: string;
+}
+
+const { layer, artifact, docs, currentId } = Astro.props;
+const inH = incoming(layer, artifact);
+const outH = outgoing(layer, artifact);
+
+const targets = (pair: [string, string]) =>
+  docs.filter((d) => d.data.layer === pair[0] && d.data.artifact === pair[1] && d.id !== currentId);
+
+const label = (pair: [string, string]) => `${layerName(pair[0])} / ${artifactName(pair[0], pair[1])}`;
+---
+{(inH.length > 0 || outH.length > 0) && (
+  <nav class="handoffs" aria-label="成果物の受け渡し">
+    {inH.length > 0 && (
+      <div>
+        <h2>受け取る</h2>
+        <ul>
+          {inH.map((h) => {
+            const ds = targets(h.from);
+            return (
+              <li>
+                {ds.length === 0
+                  ? <span class="empty">{label(h.from)}（未作成）</span>
+                  : ds.map((d) => <a href={`/docs/${d.id}`}>{ds.length === 1 ? label(h.from) : d.data.title}</a>)}
+                <small>{h.what}</small>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    )}
+    {outH.length > 0 && (
+      <div>
+        <h2>渡す</h2>
+        <ul>
+          {outH.map((h) => {
+            const ds = targets(h.to);
+            return (
+              <li>
+                {ds.length === 0
+                  ? <span class="empty">{label(h.to)}（未作成）</span>
+                  : ds.map((d) => <a href={`/docs/${d.id}`}>{ds.length === 1 ? label(h.to) : d.data.title}</a>)}
+                <small>{h.what}</small>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    )}
+  </nav>
+)}

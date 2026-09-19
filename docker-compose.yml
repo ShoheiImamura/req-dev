@@ -1,0 +1,8 @@
+# ローカル PlantUML サーバ（図の内容を外部に送らない）
+# docker compose up -d && echo PLANTUML_SERVER=http://localhost:8080 > .env
+services:
+  plantuml:
+    image: plantuml/plantuml-server:jetty
+    ports:
+      - "8080:8080"
+    restart: unless-stopped

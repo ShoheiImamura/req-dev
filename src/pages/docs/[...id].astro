@@ -1,0 +1,53 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import StatusBadge from '../../components/StatusBadge.astro';
+import Questions from '../../components/Questions.astro';
+import Handoffs from '../../components/Handoffs.astro';
+import { layerName, artifactName } from '../../lib/minimal-set';
+
+export async function getStaticPaths() {
+  const docs = await getCollection('docs');
+  return docs.map((doc) => ({ params: { id: doc.id }, props: { doc } }));
+}
+const { doc } = Astro.props;
+const { Content } = await render(doc);
+const allDocs = await getCollection('docs');
+const notes = (await getCollection('notes')).filter((n) => n.data.related.includes(doc.id));
+const fmt = (d?: Date) => d ? d.toISOString().slice(0, 10) : '';
+---
+<Base title={doc.data.title} currentId={doc.id}>
+  <header class="doc-head">
+    <div class="crumbs">{layerName(doc.data.layer)} / {artifactName(doc.data.layer, doc.data.artifact)}</div>
+    <h1>{doc.data.title} <StatusBadge status={doc.data.status} /></h1>
+    <div class="meta">
+      {doc.data.updated && <span>更新: {fmt(doc.data.updated)}</span>}
+      <span>ファイル: src/content/docs/{doc.id}.md</span>
+    </div>
+    {doc.data.summary && <p>{doc.data.summary}</p>}
+  </header>
+
+  <Handoffs layer={doc.data.layer} artifact={doc.data.artifact} docs={allDocs} currentId={doc.id} />
+
+  <Content />
+
+  <Questions questions={doc.data.questions} />
+
+  {doc.data.sources.length > 0 && (
+    <section class="sources">
+      <h2>根拠・参照</h2>
+      <ul>{doc.data.sources.map((s) => (
+        <li>{s.url ? <a href={s.url} target="_blank" rel="noopener">{s.title}</a> : s.title}{s.note && ` — ${s.note}`}</li>
+      ))}</ul>
+    </section>
+  )}
+
+  {notes.length > 0 && (
+    <section class="related">
+      <h2>関連する受領情報・調査メモ</h2>
+      <ul>{notes.map((n) => (
+        <li><a href={`/notes/${n.id}`}>{n.data.title}</a> <small>({n.data.kind === 'customer' ? 'お客様' : '調査'} / {fmt(n.data.date)})</small></li>
+      ))}</ul>
+    </section>
+  )}
+</Base>

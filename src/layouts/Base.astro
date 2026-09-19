@@ -1,0 +1,70 @@
+---
+import { getCollection } from 'astro:content';
+import { LAYERS, LAYER_SECTIONS } from '../lib/minimal-set';
+import '../styles/global.css';
+
+interface Props { title: string; currentId?: string }
+const { title, currentId } = Astro.props;
+
+const docs = await getCollection('docs');
+const docsFor = (layer: string, artifact: string) =>
+  docs.filter((d) => d.data.layer === layer && d.data.artifact === artifact);
+const openCount = docs.reduce((n, d) => n + d.data.questions.filter((q) => q.status === 'open').length, 0);
+---
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.svg" />
+    <title>{title} | 要件定義</title>
+  </head>
+  <body>
+    <div class="shell">
+      <nav class="side">
+        <h1><a href="/">要件定義 最小セット</a></h1>
+        <div class="top">
+          <a href="/questions">確認事項一覧 <span class="count">（未解決 {openCount}）</span></a>
+          <a href="/notes">受領情報・調査メモ</a>
+        </div>
+        {LAYER_SECTIONS.map((section) => (
+          <>
+            <p class="side-section">{section.name}</p>
+            {section.layers.map((key) => {
+              const layer = LAYERS.find((l) => l.key === key)!;
+              return (
+                <>
+                  <h2>{layer.name}</h2>
+                  <ul>
+                    {layer.artifacts.map((a) => {
+                      const ds = docsFor(layer.key, a.key);
+                      if (ds.length === 0) return <li class="todo"><span class="dot todo"></span><span>{a.name}</span></li>;
+                      return ds.map((d) => (
+                        <li class={d.id === currentId ? 'current' : ''}>
+                          <span class={`dot ${d.data.status}`}></span>
+                          <a href={`/docs/${d.id}`}>{ds.length > 1 ? d.data.title : a.name}</a>
+                        </li>
+                      ));
+                    })}
+                  </ul>
+                </>
+              );
+            })}
+          </>
+        ))}
+      </nav>
+      <main class="main">
+        <slot />
+      </main>
+    </div>
+    <script type="module" is:inline>
+      // ```mermaid ブロックがあるページだけ mermaid を CDN から読み込む
+      if (document.querySelector('pre.mermaid')) {
+        import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs').then(({ default: mermaid }) => {
+          mermaid.initialize({ startOnLoad: false });
+          mermaid.run({ querySelector: 'pre.mermaid' });
+        });
+      }
+    </script>
+  </body>
+</html>

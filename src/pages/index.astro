@@ -1,0 +1,54 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import StatusBadge from '../components/StatusBadge.astro';
+import Pipeline from '../components/Pipeline.astro';
+import { LAYERS, LAYER_SECTIONS } from '../lib/minimal-set';
+
+const docs = await getCollection('docs');
+const docsFor = (layer: string, artifact: string) =>
+  docs.filter((d) => d.data.layer === layer && d.data.artifact === artifact);
+const total = LAYERS.reduce((n, l) => n + l.artifacts.length, 0);
+const done = LAYERS.reduce((n, l) => n + l.artifacts.filter((a) => docsFor(l.key, a.key).some((d) => d.data.status === 'agreed')).length, 0);
+const fmt = (d?: Date) => d ? d.toISOString().slice(0, 10) : '';
+---
+<Base title="最小セット一覧">
+  <h1>要件定義 最小セット <span class="count">合意済み {done} / {total}</span></h1>
+  <p>層は独立したフォルダではない。本線で価値から設計へ渡し、情報モデルの名詞だけ DB と画面へ分岐する。</p>
+  <Pipeline docs={docs} />
+
+  {LAYER_SECTIONS.map((section) => (
+    <>
+      <h2 class="section-label">{section.name}<small class="count"> {section.hint}</small></h2>
+      {section.layers.map((key) => {
+        const layer = LAYERS.find((l) => l.key === key)!;
+        return (
+    <section>
+      <h3>{layer.name}</h3>
+      <table>
+        <thead><tr><th style="width:30%">成果物</th><th>ドキュメント</th><th style="width:14%">状態</th><th style="width:10%">未解決</th><th style="width:12%">更新</th></tr></thead>
+        <tbody>
+          {layer.artifacts.map((a) => {
+            const ds = docsFor(layer.key, a.key);
+            if (ds.length === 0) return (
+              <tr><td>{a.name}<br /><small class="count">{a.hint}</small></td><td class="empty">src/content/docs/{layer.key}/{a.key}.md を作成</td><td><StatusBadge status="todo" /></td><td>-</td><td></td></tr>
+            );
+            return ds.map((d, i) => (
+              <tr>
+                {i === 0 && <td rowspan={ds.length}>{a.name}<br /><small class="count">{a.hint}</small></td>}
+                <td><a href={`/docs/${d.id}`}>{d.data.title}</a>{d.data.summary && <><br /><small class="count">{d.data.summary}</small></>}</td>
+                <td><StatusBadge status={d.data.status} /></td>
+                <td>{d.data.questions.filter((q) => q.status === 'open').length}</td>
+                <td>{fmt(d.data.updated)}</td>
+              </tr>
+            ));
+          })}
+        </tbody>
+      </table>
+      {layer.later && <p class="later">後回し: {layer.later.join('、')}</p>}
+    </section>
+        );
+      })}
+    </>
+  ))}
+</Base>
