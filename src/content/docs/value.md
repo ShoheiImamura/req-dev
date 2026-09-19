@@ -42,54 +42,42 @@ c -right-> s
 
 ## 要求：何を実現するか
 
-上の理念（黄）を根にして、要求（橙：何をしたいか）と要件（青：システムとして何をするか）に分解する。
+理念（黄）を、何をしたいか（橙）、そのためにシステムが何をするか（青）に分解する。誰の要求かは、コンテキストとユースケースで扱う。
 
 ```plantuml 要求の分解
-@startmindmap
-skinparam defaultFontSize 13
-<style>
-mindmapDiagram {
-  node { LineColor #999 }
-}
-</style>
-*[#FFF3C4] 備品の貸出管理を\n人の記憶に頼らず回したい
-**[#FFE0B2] 誰が何を借りているかすぐ分かる
-***[#BBDEFB] 貸出時に借用者・備品・返却予定日を記録する
-***[#BBDEFB] 貸出中の一覧を誰でも参照できる
-**[#FFE0B2] 返却忘れを減らす
-***[#BBDEFB] 返却予定日の前日に借用者へ通知する
-***[#BBDEFB] 期限超過の一覧を総務担当が確認できる
-**[#FFE0B2] 備品の所在を把握する
-***[#BBDEFB] 備品マスタに保管場所を持つ
-***[#BBDEFB] 貸出中は所在を「借用者」として表示する
-@endmindmap
-```
-
-誰の要求で、どの要件がそれを満たすか。
-
-```plantuml 誰の要求か
 @startuml
 left to right direction
-skinparam defaultFontSize 12
-actor 総務担当
-actor 社員
-rectangle "要求（したいこと）" #FFF8E1 {
-  card "返却忘れを減らしたい" as r1 #FFE0B2
-  card "誰が持っているか\nすぐ知りたい" as r2 #FFE0B2
-  card "借りる手続きを\n面倒にしたくない" as r3 #FFE0B2
-}
-rectangle "要件（システムがすること）" #E3F2FD {
-  card "返却予定日前日の通知" as q1 #BBDEFB
-  card "期限超過一覧" as q2 #BBDEFB
-  card "貸出中一覧" as q3 #BBDEFB
-  card "備品を選んで 1 操作で貸出登録" as q4 #BBDEFB
-}
-総務担当 --> r1
-総務担当 --> r2
-社員 --> r3
+skinparam defaultFontSize 13
+skinparam rectangleBorderColor #999
+skinparam cardBorderColor #999
+skinparam nodesep 18
+skinparam ranksep 50
+
+rectangle "<b>理念</b>\n備品の貸出管理を\n人の記憶に頼らず回したい" as root #FFF3C4
+
+card "誰が何を借りているか\nすぐ知りたい" as r1 #FFE0B2
+card "返却忘れを減らしたい" as r2 #FFE0B2
+card "備品の所在を把握したい" as r3 #FFE0B2
+card "借りる手続きを\n面倒にしたくない" as r4 #FFE0B2
+
+card "貸出時に借用者・備品・返却予定日を記録する" as q1 #BBDEFB
+card "貸出中の一覧を誰でも参照できる" as q2 #BBDEFB
+card "返却予定日の前日に借用者へ通知する" as q3 #BBDEFB
+card "期限超過の一覧を総務担当が確認できる" as q4 #BBDEFB
+card "備品マスタに保管場所を持つ" as q5 #BBDEFB
+card "貸出中は所在を「借用者」として表示する" as q6 #BBDEFB
+card "備品を選んで 1 操作で貸出登録" as q7 #BBDEFB
+
+root --> r1
+root --> r2
+root --> r3
+root --> r4
 r1 --> q1
 r1 --> q2
 r2 --> q3
-r3 --> q4
+r2 --> q4
+r3 --> q5
+r3 --> q6
+r4 --> q7
 @enduml
 ```

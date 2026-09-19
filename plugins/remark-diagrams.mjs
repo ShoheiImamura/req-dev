@@ -13,15 +13,19 @@ const escapeHtml = (s) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 // 取得した SVG を HTML に埋め込める形に整える
+//  - XML 宣言を外す
+//  - ルート要素の固定 width/height スタイルを外し、CSS で縮小できるようにする
+//  - 元の幅の 1.5 倍までは拡大を許す（広い画面で図を大きく見せる）
 function cleanSvg(svg) {
-  return svg
-    .replace(/^\s*<\?xml[^>]*\?>\s*/i, '')
-    // ルート要素の固定 width/height スタイルを外して CSS で縮小できるようにする
-    .replace(/^(<svg[^>]*?)\sstyle="([^"]*)"/i, (_, head, style) => {
-      const kept = style.split(';').map((s) => s.trim()).filter((s) => s && !/^(width|height)\s*:/.test(s));
-      return kept.length ? `${head} style="${kept.join(';')}"` : head;
-    })
-    .replace(/^(<svg)(?![^>]*\sclass=)/i, '$1 class="plantuml"');
+  svg = svg.replace(/^\s*<\?xml[^>]*\?>\s*/i, '');
+  return svg.replace(/^<svg\b([^>]*)>/i, (_, attrs) => {
+    const width = Number((attrs.match(/\swidth="(\d+)(?:px)?"/i) ?? [])[1]);
+    const style = (attrs.match(/\sstyle="([^"]*)"/i) ?? [])[1] ?? '';
+    const kept = style.split(';').map((x) => x.trim()).filter((x) => x && !/^(width|height)\s*:/.test(x));
+    if (width) kept.push(`max-width:${Math.round(width * 1.5)}px`);
+    attrs = attrs.replace(/\sstyle="[^"]*"/i, '').replace(/\sclass="[^"]*"/i, '');
+    return `<svg class="plantuml"${kept.length ? ` style="${kept.join(';')}"` : ''}${attrs}>`;
+  });
 }
 
 async function fetchSvg(server, src, cacheDir) {

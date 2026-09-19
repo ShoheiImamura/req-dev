@@ -26,8 +26,11 @@ const fmt = (d?: Date) => d ? d.toISOString().slice(0, 10) : '';
     {doc.data.summary && <p>{doc.data.summary}</p>}
   </header>
 
+  <div class="doc-grid">
+  <article class="doc-body">
   <Content />
-
+  </article>
+  <aside class="doc-aside">
   <Questions questions={doc.data.questions} />
 
   {doc.data.sources.length > 0 && (
@@ -47,6 +50,8 @@ const fmt = (d?: Date) => d ? d.toISOString().slice(0, 10) : '';
       ))}</ul>
     </section>
   )}
+  </aside>
+  </div>
 
   <Handoffs step={doc.data.step} docs={allDocs} currentId={doc.id} />
 </Base>

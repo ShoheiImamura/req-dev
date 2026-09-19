@@ -24,14 +24,6 @@ const openCount = docs.reduce((n, d) => n + d.data.questions.filter((q) => q.sta
       <button class="side-toggle" type="button" aria-expanded="false" aria-controls="side-nav">メニュー</button>
       <nav class="side" id="side-nav">
         <h1><a href="/">要件定義</a></h1>
-        <div class="side-top">
-          <a class="side-link" href="/questions" aria-current={Astro.url.pathname.startsWith('/questions') ? 'page' : undefined}>
-            <span class="label">確認事項一覧</span><span class="count">未解決 {openCount}</span>
-          </a>
-          <a class="side-link" href="/notes" aria-current={Astro.url.pathname.startsWith('/notes') ? 'page' : undefined}>
-            <span class="label">受領情報・調査メモ</span>
-          </a>
-        </div>
         <p class="side-section">価値から処理まで</p>
         <ol class="side-spine">
           {STEPS.map((step, i) => {
@@ -70,6 +62,14 @@ const openCount = docs.reduce((n, d) => n + d.data.questions.filter((q) => q.sta
             );
           })}
         </ol>
+        <div class="side-top side-below">
+          <a class="side-link" href="/questions" aria-current={Astro.url.pathname.startsWith('/questions') ? 'page' : undefined}>
+            <span class="label">確認事項一覧</span><span class="count">未解決 {openCount}</span>
+          </a>
+          <a class="side-link" href="/notes" aria-current={Astro.url.pathname.startsWith('/notes') ? 'page' : undefined}>
+            <span class="label">受領情報・調査メモ</span>
+          </a>
+        </div>
         <p class="side-legend">
           <span><span class="dot agreed"></span>合意済み</span>
           <span><span class="dot review"></span>お客様確認中</span>

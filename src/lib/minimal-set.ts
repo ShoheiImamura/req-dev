@@ -22,7 +22,7 @@ export interface Step {
 export const STEPS: Step[] = [
   { key: 'value', name: '価値と要求', hint: 'なぜ作り、何を実現するか', ref: '匠 価値デザイン／要求分析ツリー、RDRA 要求モデル' },
   { key: 'context', name: 'コンテキスト', hint: '誰が・どの業務で', ref: 'RDRA システム／ビジネスコンテキスト' },
-  { key: 'flow', name: '業務の流れ', hint: 'どう進むか', ref: 'RDRA 業務フロー／利用シーン' },
+  { key: 'flow', name: '業務', hint: '誰が、どの仕事を、どの順で', ref: 'RDRA ビジネスコンテキスト／業務フロー' },
   { key: 'usecase', name: 'ユースケース', hint: 'システムとの接点', ref: 'RDRA UC複合図 / ICONIX ユースケース記述' },
   { key: 'information', name: '情報', hint: '扱う名詞（正本）', ref: 'RDRA 情報モデル' },
   { key: 'state', name: '状態', hint: '名詞が取りうる変化', ref: 'RDRA 状態モデル' },
@@ -46,7 +46,7 @@ export interface Handoff {
 
 export const HANDOFFS: Handoff[] = [
   { from: 'value', to: 'context', what: '要求を誰が・どの業務で実現するか' },
-  { from: 'context', to: 'flow', what: '対象業務の流れ' },
+  { from: 'context', to: 'flow', what: '境界の内側で回る業務' },
   { from: 'flow', to: 'usecase', what: 'システムとの接点' },
   { from: 'flow', to: 'information', what: '業務で扱う名詞' },
   { from: 'usecase', to: 'information', what: '操作する情報' },
