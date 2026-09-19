@@ -2,7 +2,6 @@
 // 手法名は成果物の軸にしない。参考として STEPS[].ref に残すだけ。
 export type StepKey =
   | 'value'
-  | 'requirements'
   | 'context'
   | 'flow'
   | 'usecase'
@@ -21,8 +20,7 @@ export interface Step {
 }
 
 export const STEPS: Step[] = [
-  { key: 'value', name: '価値', hint: 'なぜ作るか', ref: '匠 価値デザイン' },
-  { key: 'requirements', name: '要求', hint: '何を実現するか', ref: '匠 要求分析ツリー / RDRA 要求モデル' },
+  { key: 'value', name: '価値と要求', hint: 'なぜ作り、何を実現するか', ref: '匠 価値デザイン／要求分析ツリー、RDRA 要求モデル' },
   { key: 'context', name: 'コンテキスト', hint: '誰が・どの業務で', ref: 'RDRA システム／ビジネスコンテキスト' },
   { key: 'flow', name: '業務の流れ', hint: 'どう進むか', ref: 'RDRA 業務フロー／利用シーン' },
   { key: 'usecase', name: 'ユースケース', hint: 'システムとの接点', ref: 'RDRA UC複合図 / ICONIX ユースケース記述' },
@@ -35,7 +33,7 @@ export const STEPS: Step[] = [
 
 /** パイプラインの並び。価値〜UC が本線、情報をハブに画面／処理／データへ。 */
 export const SPINE = {
-  main: ['value', 'requirements', 'context', 'flow', 'usecase'] as StepKey[],
+  main: ['value', 'context', 'flow', 'usecase'] as StepKey[],
   hub: ['information', 'state'] as StepKey[],
   out: ['screens', 'processing', 'data'] as StepKey[],
 };
@@ -47,8 +45,7 @@ export interface Handoff {
 }
 
 export const HANDOFFS: Handoff[] = [
-  { from: 'value', to: 'requirements', what: '理念が要求の根' },
-  { from: 'requirements', to: 'context', what: '誰が・どの業務で実現するか' },
+  { from: 'value', to: 'context', what: '要求を誰が・どの業務で実現するか' },
   { from: 'context', to: 'flow', what: '対象業務の流れ' },
   { from: 'flow', to: 'usecase', what: 'システムとの接点' },
   { from: 'flow', to: 'information', what: '業務で扱う名詞' },

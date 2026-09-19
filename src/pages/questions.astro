@@ -13,7 +13,7 @@ const fmt = (d?: Date) => d ? d.toISOString().slice(0, 10) : '';
 ---
 <Base title="確認事項一覧">
   <h1>確認事項一覧 <span class="count">未解決 {openTotal}</span></h1>
-  <p>お客様と認識を合わせたい点を、流れの順にまとめたもの。解決したら各 md の <code>questions[].status</code> を <code>resolved</code> にし、<code>note</code> に決定内容を書く。</p>
+  <p>認識を合わせたい点を、流れの順にまとめたものです。決まったことは「回答・決定」に残します。</p>
 
   {withQ.length === 0 && <p class="empty">確認事項はまだありません。</p>}
 

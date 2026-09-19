@@ -4,7 +4,6 @@ import { glob } from 'astro/loaders';
 
 export const stepKey = z.enum([
   'value',
-  'requirements',
   'context',
   'flow',
   'usecase',

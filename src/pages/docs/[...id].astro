@@ -22,12 +22,9 @@ const fmt = (d?: Date) => d ? d.toISOString().slice(0, 10) : '';
     <h1>{doc.data.title} <StatusBadge status={doc.data.status} /></h1>
     <div class="meta">
       {doc.data.updated && <span>更新: {fmt(doc.data.updated)}</span>}
-      <span>ファイル: src/content/docs/{doc.id}.md</span>
     </div>
     {doc.data.summary && <p>{doc.data.summary}</p>}
   </header>
-
-  <Handoffs step={doc.data.step} docs={allDocs} currentId={doc.id} />
 
   <Content />
 
@@ -50,4 +47,6 @@ const fmt = (d?: Date) => d ? d.toISOString().slice(0, 10) : '';
       ))}</ul>
     </section>
   )}
+
+  <Handoffs step={doc.data.step} docs={allDocs} currentId={doc.id} />
 </Base>

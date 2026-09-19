@@ -1,36 +1,95 @@
 ---
-title: 価値
+title: 価値と要求
 step: value
 status: review
 updated: 2026-09-18
-summary: 何のためにこのシステムを作るのか（例題：社内備品の貸出管理）
+summary: 何のために作り、何を実現するか（例題：社内備品の貸出管理）
 questions:
   - q: 「返却忘れをゼロにする」まで狙うのか、「催促の手間を減らす」で十分か
     asked: 2026-09-18
   - q: 対象は総務管理の備品だけか、部署ごとの私物備品も含むか
     status: resolved
     note: 初期は総務管理備品のみ。部署備品は次フェーズ（9/18 打合せ）
+  - q: 「期限前日に通知」の手段はメールか、社内チャットか（両方か）
+  - q: 期限超過時に上長へも通知する要求はあるか
+  - q: 社員側の要求「手続きが面倒でない」の具体的な許容ライン（何操作まで）は？
 sources:
   - title: キックオフ打合せメモ
     note: notes/2026-09-10-kickoff
 ---
 
-```plantuml 価値
+## 価値：なぜ作るか
+
+```plantuml なぜ作るか
 @startuml
-skinparam rectangleBackgroundColor #FFFDE7
-skinparam rectangleBorderColor #999
 skinparam defaultFontSize 13
-rectangle "<b>理念・意義</b>\n備品が「今どこに・誰の手元にあるか」を\n誰もがその場で知れる状態にする" as p
-rectangle "<b>ビジョン</b>\n貸出の記録と返却の催促が\n特定の人の記憶に依存しない" as v
-rectangle "<b>コンセプト</b>\n・借りるときに 1 操作で記録が残る\n・返却期限は自動で本人に届く\n・在庫と所在が一覧で見える" as c
-rectangle "<b>ストーリー</b>\n月曜朝、総務担当は未返却一覧を開き\n該当者に声をかけるだけで棚卸しが終わる" as s
-p -down-> v
-v -down-> c
-c -down-> s
+skinparam rectangleBorderColor #999
+skinparam nodesep 30
+rectangle "<b>理念・意義</b>\n備品が「今どこに・誰の手元にあるか」を\n誰もがその場で知れる状態にする" as p #FFF3C4
+rectangle "<b>ビジョン</b>\n貸出の記録と返却の催促が\n特定の人の記憶に依存しない" as v #FFE0B2
+rectangle "<b>コンセプト</b>\n・借りるときに 1 操作で記録が残る\n・返却期限は自動で本人に届く\n・在庫と所在が一覧で見える" as c #DCEDC8
+rectangle "<b>ストーリー</b>\n月曜朝、総務担当は未返却一覧を開き\n該当者に声をかけるだけで棚卸しが終わる" as s #BBDEFB
+p -right-> v
+v -right-> c
+c -right-> s
 @enduml
 ```
 
-## 補足
+## 価値の補足
 
 - 「意義」はお客様の言葉をなるべくそのまま使う。言い換えた箇所は確認事項に残す。
 - ストーリーは代表的な 1 シーンに絞る。複数ある場合は業務の流れへ足す。
+
+## 要求：何を実現するか
+
+上の理念（黄）を根にして、要求（橙：何をしたいか）と要件（青：システムとして何をするか）に分解する。
+
+```plantuml 要求の分解
+@startmindmap
+skinparam defaultFontSize 13
+<style>
+mindmapDiagram {
+  node { LineColor #999 }
+}
+</style>
+*[#FFF3C4] 備品の貸出管理を\n人の記憶に頼らず回したい
+**[#FFE0B2] 誰が何を借りているかすぐ分かる
+***[#BBDEFB] 貸出時に借用者・備品・返却予定日を記録する
+***[#BBDEFB] 貸出中の一覧を誰でも参照できる
+**[#FFE0B2] 返却忘れを減らす
+***[#BBDEFB] 返却予定日の前日に借用者へ通知する
+***[#BBDEFB] 期限超過の一覧を総務担当が確認できる
+**[#FFE0B2] 備品の所在を把握する
+***[#BBDEFB] 備品マスタに保管場所を持つ
+***[#BBDEFB] 貸出中は所在を「借用者」として表示する
+@endmindmap
+```
+
+誰の要求で、どの要件がそれを満たすか。
+
+```plantuml 誰の要求か
+@startuml
+left to right direction
+skinparam defaultFontSize 12
+actor 総務担当
+actor 社員
+rectangle "要求（したいこと）" #FFF8E1 {
+  card "返却忘れを減らしたい" as r1 #FFE0B2
+  card "誰が持っているか\nすぐ知りたい" as r2 #FFE0B2
+  card "借りる手続きを\n面倒にしたくない" as r3 #FFE0B2
+}
+rectangle "要件（システムがすること）" #E3F2FD {
+  card "返却予定日前日の通知" as q1 #BBDEFB
+  card "期限超過一覧" as q2 #BBDEFB
+  card "貸出中一覧" as q3 #BBDEFB
+  card "備品を選んで 1 操作で貸出登録" as q4 #BBDEFB
+}
+総務担当 --> r1
+総務担当 --> r2
+社員 --> r3
+r1 --> q1
+r1 --> q2
+r2 --> q3
+r3 --> q4
+@enduml
+```

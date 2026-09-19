@@ -9,61 +9,31 @@ interface Props {
 }
 
 const { step, docs, currentId } = Astro.props;
-const inH = incoming(step);
-const outH = outgoing(step);
 const ref = stepOf(step)?.ref;
 
-const targets = (key: string) =>
-  docs.filter((d) => d.data.step === key && d.id !== currentId)
-    .sort((a, b) => a.id.length - b.id.length);
+// 各つながりを「リンクの並び」に落とす。説明は title 属性にだけ残す。
+const links = (hs: { from: string; to: string; what: string }[], side: 'from' | 'to') =>
+  hs.flatMap((h) => {
+    const key = h[side];
+    const ds = docs
+      .filter((d) => d.data.step === key && d.id !== currentId)
+      .sort((a, b) => a.id.length - b.id.length);
+    if (ds.length === 0) return [{ label: stepName(key), what: h.what }];
+    if (ds.length === 1) return [{ href: `/docs/${ds[0].id}`, label: stepName(key), what: h.what }];
+    return ds.map((d) => ({ href: `/docs/${d.id}`, label: d.data.title, what: h.what }));
+  });
 
-const label = (key: string, ds: CollectionEntry<'docs'>[]) => {
-  if (ds.length === 1 && ds[0].data.title !== stepName(key)) return ds[0].data.title;
-  return stepName(key);
-};
+const prev = links(incoming(step), 'from');
+const next = links(outgoing(step), 'to');
 ---
-{(inH.length > 0 || outH.length > 0) && (
-  <nav class="handoffs" aria-label="前後のつながり">
-    {inH.length > 0 && (
-      <div>
-        <h2>前から</h2>
-        <ul>
-          {inH.map((h) => {
-            const ds = targets(h.from);
-            return (
-              <li>
-                {ds.length === 0
-                  ? <span class="empty">{stepName(h.from)}（未作成）</span>
-                  : ds.length === 1
-                    ? <a href={`/docs/${ds[0].id}`}>{label(h.from, ds)}</a>
-                    : ds.map((d) => <a href={`/docs/${d.id}`}>{d.data.title}</a>)}
-                <small>{h.what}</small>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+{(prev.length > 0 || next.length > 0 || ref) && (
+  <footer class="handoffs">
+    {prev.length > 0 && (
+      <span><b>前から</b>{prev.map((l) => l.href ? <a href={l.href} title={l.what}>{l.label}</a> : <span class="empty" title={l.what}>{l.label}</span>)}</span>
     )}
-    {outH.length > 0 && (
-      <div>
-        <h2>次へ</h2>
-        <ul>
-          {outH.map((h) => {
-            const ds = targets(h.to);
-            return (
-              <li>
-                {ds.length === 0
-                  ? <span class="empty">{stepName(h.to)}（未作成）</span>
-                  : ds.length === 1
-                    ? <a href={`/docs/${ds[0].id}`}>{label(h.to, ds)}</a>
-                    : ds.map((d) => <a href={`/docs/${d.id}`}>{d.data.title}</a>)}
-                <small>{h.what}</small>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+    {next.length > 0 && (
+      <span><b>次へ</b>{next.map((l) => l.href ? <a href={l.href} title={l.what}>{l.label}</a> : <span class="empty" title={l.what}>{l.label}</span>)}</span>
     )}
-    {ref && <p class="handoffs-ref">参考: {ref}</p>}
-  </nav>
+    {ref && <span class="handoffs-ref">参考: {ref}</span>}
+  </footer>
 )}

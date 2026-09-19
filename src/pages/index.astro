@@ -14,7 +14,7 @@ const fmt = (d?: Date) => d ? d.toISOString().slice(0, 10) : '';
 ---
 <Base title="一連の流れ">
   <h1>要件定義 <span class="count">合意済み {done} / {total}</span></h1>
-  <p>手法の図を並べない。価値からユースケース／処理まで、同じ名詞でつなぐ。</p>
+  <p>なぜ作るか（価値）から、画面・処理・データまでを一本の流れで確認していきます。</p>
   <Pipeline docs={docs} />
 
   <table>
@@ -34,7 +34,7 @@ const fmt = (d?: Date) => d ? d.toISOString().slice(0, 10) : '';
           return (
             <tr>
               <td>{step.name}<br /><small class="count">{step.hint}</small></td>
-              <td class="empty">src/content/docs/{step.key}.md を作成</td>
+              <td class="empty">未作成</td>
               <td><StatusBadge status="todo" /></td>
               <td>-</td>
               <td></td>
@@ -60,5 +60,5 @@ const fmt = (d?: Date) => d ? d.toISOString().slice(0, 10) : '';
       })}
     </tbody>
   </table>
-  <p class="later">後回し: 業務の細分割、バリエーション（規模が出てから）。クラス図は処理とデータで足りる間は書かない。</p>
+  <p class="later">後回し: 業務の細分割、バリエーション（規模が出てから）。</p>
 </Base>

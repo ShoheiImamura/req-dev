@@ -23,6 +23,7 @@
     "esbuild": true
   },
   "devDependencies": {
-    "@types/node": "^26.6.2"
+    "@types/node": "^26.6.2",
+    "playwright-core": "^1.63.0"
   }
 }

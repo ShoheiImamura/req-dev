@@ -10,13 +10,13 @@ const groups = [
 ---
 <Base title="受領情報・調査メモ">
   <h1>受領情報・調査メモ</h1>
-  <p>図の根拠になる情報。<code>related</code> にドキュメント id を書くと各図のページからも辿れる。</p>
+  <p>図の根拠になった情報です。関連する図のページからも辿れます。</p>
   {groups.map((g) => {
     const ns = notes.filter((n) => n.data.kind === g.kind);
     return (
       <section>
         <h2>{g.name}</h2>
-        {ns.length === 0 && <p class="empty">なし（src/content/notes/ に md を追加）</p>}
+        {ns.length === 0 && <p class="empty">なし</p>}
         <div class="cards">
           {ns.map((n) => (
             <article class="card">
