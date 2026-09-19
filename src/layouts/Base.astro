@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
-import { STEPS } from '../lib/minimal-set';
+import { STEPS, sortDocs } from '../lib/minimal-set';
 import '../styles/global.css';
 
 interface Props { title: string; currentId?: string }
@@ -8,7 +8,7 @@ const { title, currentId } = Astro.props;
 
 const docs = await getCollection('docs');
 const docsFor = (step: string) =>
-  docs.filter((d) => d.data.step === step).sort((a, b) => a.id.length - b.id.length);
+  sortDocs(docs.filter((d) => d.data.step === step));
 const openCount = docs.reduce((n, d) => n + d.data.questions.filter((q) => q.status === 'open').length, 0);
 ---
 <!doctype html>

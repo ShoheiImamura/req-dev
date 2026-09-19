@@ -1,57 +1,50 @@
 ---
 title: 業務の全体像
 step: flow
+order: 0
 status: draft
 updated: 2026-09-18
-summary: 誰が、どの仕事を、どの順で回すか。個別の手順はユースケースで
+summary: 大きな業務は 3 つ。誰が担い、どの順で回るか。中身は個別業務のページで
 questions:
-  - q: 貸出時に総務担当の承認は必要か。現状は「声かけのみ」と聞いている
-    asked: 2026-09-18
-  - q: 返却は社員本人が登録するのか、総務が棚に戻ったのを見て登録するのか
-  - q: 「棚卸し」業務は今回の対象に含めるか（年 1 回の実地確認）
+  - q: 備品の購入（購買）は対象外でよいか。納品後の「登録」からが対象という理解
 ---
 
-業務（橙）をつなぐ矢印が、仕事の順番。灰色は今回の対象外。
+業務（橙）をつなぐ矢印が回る順番。灰色は今回の対象外。各業務をクリックすると個別のページへ。
 
 ```plantuml 業務の全体像
 @startuml
 left to right direction
-skinparam defaultFontSize 13
+skinparam defaultFontSize 14
 skinparam usecaseBorderColor #999
 skinparam actorBorderColor #555
-skinparam nodesep 20
-skinparam ranksep 60
+skinparam nodesep 30
+skinparam ranksep 70
 
 actor 購買担当 as buyer
 actor 総務担当 as admin
 actor 社員 as emp
 
-usecase "備品を購入する\n（対象外）" as p0 #EEEEEE
-usecase "備品を登録する" as b1 #FFE0B2
-usecase "備品を貸し出す" as b2 #FFE0B2
-usecase "返却を受ける" as b3 #FFE0B2
-usecase "未返却を催促する" as b4 #FFE0B2
-usecase "備品を廃棄する" as b5 #FFE0B2
-usecase "棚卸しする\n（対象外？）" as b6 #EEEEEE
+usecase "備品の購入\n（対象外）" as p0 #EEEEEE
+usecase "<b>1. 備品の管理</b>\n登録・廃棄・棚卸し" as b1 [[/docs/flow-manage]] #FFE0B2
+usecase "<b>2. 貸出・返却</b>\n借りる・使う・返す" as b2 [[/docs/flow-lend]] #FFE0B2
+usecase "<b>3. 未返却の催促</b>\n期限超過の確認・声かけ" as b3 [[/docs/flow-remind]] #FFE0B2
 
 p0 --> b1 : 納品
-b1 --> b2 : 貸出可能に
-b2 --> b3 : 期限内に返す
-b2 --> b4 : 期限超過
-b4 --> b3 : 声かけ
-b1 --> b5 : 使わなくなった
-b1 --> b6 : 年 1 回
+b1 --> b2 : 貸出可能な備品
+b2 --> b3 : 期限超過
+b3 --> b2 : 返却
 
 buyer --> p0
 admin --> b1
-admin --> b4
-admin --> b5
-admin --> b6
+admin --> b3
 emp --> b2
-emp --> b3
 @enduml
 ```
 
-- 返却を受けたら、その備品はまた「貸し出す」に戻る（繰り返し）。
-- 価値のストーリー「月曜朝の未返却確認」は「未返却を催促する」に対応する。
-- 各業務の中の手順（画面と情報のやりとり）はユースケースに書く。
+| 業務 | 担当 | 起きるタイミング | ページ |
+|---|---|---|---|
+| 1. 備品の管理 | 総務担当 | 納品時・廃棄時・年 1 回の棚卸し | [備品の管理](/docs/flow-manage) |
+| 2. 貸出・返却 | 社員 | 日常。返却で備品は再び貸出可能に戻る | [貸出・返却](/docs/flow-lend) |
+| 3. 未返却の催促 | 総務担当 | 返却予定日を過ぎたとき（週明けにまとめて） | [未返却の催促](/docs/flow-remind) |
+
+価値のストーリー「月曜朝の未返却確認」は 3 に対応する。

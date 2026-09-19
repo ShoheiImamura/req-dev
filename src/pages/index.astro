@@ -3,11 +3,11 @@ import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import StatusBadge from '../components/StatusBadge.astro';
 import Pipeline from '../components/Pipeline.astro';
-import { STEPS } from '../lib/minimal-set';
+import { STEPS, sortDocs } from '../lib/minimal-set';
 
 const docs = await getCollection('docs');
 const docsFor = (step: string) =>
-  docs.filter((d) => d.data.step === step).sort((a, b) => a.id.length - b.id.length);
+  sortDocs(docs.filter((d) => d.data.step === step));
 const total = STEPS.length;
 const done = STEPS.filter((s) => docsFor(s.key).some((d) => d.data.status === 'agreed')).length;
 const fmt = (d?: Date) => d ? d.toISOString().slice(0, 10) : '';

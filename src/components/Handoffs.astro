@@ -1,6 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import { incoming, outgoing, stepName, stepOf } from '../lib/minimal-set';
+import { incoming, outgoing, stepName, stepOf, sortDocs } from '../lib/minimal-set';
 
 interface Props {
   step: string;
@@ -15,9 +15,7 @@ const ref = stepOf(step)?.ref;
 const links = (hs: { from: string; to: string; what: string }[], side: 'from' | 'to') =>
   hs.flatMap((h) => {
     const key = h[side];
-    const ds = docs
-      .filter((d) => d.data.step === key && d.id !== currentId)
-      .sort((a, b) => a.id.length - b.id.length);
+    const ds = sortDocs(docs.filter((d) => d.data.step === key && d.id !== currentId));
     if (ds.length === 0) return [{ label: stepName(key), what: h.what }];
     if (ds.length === 1) return [{ href: `/docs/${ds[0].id}`, label: stepName(key), what: h.what }];
     return ds.map((d) => ({ href: `/docs/${d.id}`, label: d.data.title, what: h.what }));

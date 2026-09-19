@@ -74,3 +74,12 @@ export const stepIndex = (key: string) => STEPS.findIndex((s) => s.key === key);
 
 export const incoming = (step: string) => HANDOFFS.filter((h) => h.to === step);
 export const outgoing = (step: string) => HANDOFFS.filter((h) => h.from === step);
+
+/** 同じステップ内のドキュメントの並び。order（小さい順）→ id の短い順（概要が先）→ タイトル。 */
+export const sortDocs = <T extends { id: string; data: { order?: number; title: string } }>(docs: T[]): T[] =>
+  [...docs].sort(
+    (a, b) =>
+      (a.data.order ?? 99) - (b.data.order ?? 99) ||
+      a.id.length - b.id.length ||
+      a.data.title.localeCompare(b.data.title, 'ja'),
+  );

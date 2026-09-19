@@ -34,6 +34,7 @@ const docs = defineCollection({
     title: z.string(),
     step: stepKey,                    // 一連の流れ上の位置
     status: docStatus.default('draft'),
+    order: z.number().optional(),     // 同じステップ内の並び順
     updated: z.coerce.date().optional(),
     summary: z.string().optional(),
     questions: z.array(question).default([]),

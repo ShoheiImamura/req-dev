@@ -27,3 +27,4 @@ Full documentation: https://docs.astro.build
 - 検証: `npx astro check && npm run build`
 - 図は `plugins/remark-diagrams.mjs` がビルド時に SVG を取得してインライン展開する（`.cache/plantuml/` にキャッシュ）。ソースは表示しない。
 - プラグインを変更しても md が変わらないと再レンダリングされない。`rm -rf .astro node_modules/.astro` してからビルドする。
+- ただし dev サーバが動いている間に `.astro` を消すと、そのサーバは古い描画を返し続ける。消したら dev サーバを再起動する。

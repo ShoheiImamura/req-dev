@@ -1,6 +1,7 @@
 ---
 title: ユースケース全体
 step: usecase
+order: 0
 status: draft
 updated: 2026-09-18
 summary: 誰が（アクター）、何をして（ユースケース）、何を扱うか（情報）

@@ -1,13 +1,13 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import { STEPS, SPINE, stepName } from '../lib/minimal-set';
+import { STEPS, SPINE, stepName, sortDocs } from '../lib/minimal-set';
 import type { StepKey } from '../lib/minimal-set';
 
 interface Props { docs: CollectionEntry<'docs'>[] }
 const { docs } = Astro.props;
 
 const docsFor = (step: string) =>
-  docs.filter((d) => d.data.step === step).sort((a, b) => a.id.length - b.id.length);
+  sortDocs(docs.filter((d) => d.data.step === step));
 
 const chip = (step: StepKey) => {
   const ds = docsFor(step);
