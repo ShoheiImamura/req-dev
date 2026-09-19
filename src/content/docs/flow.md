@@ -1,7 +1,6 @@
 ---
-title: 業務フロー：備品を借りて返す
-layer: rdra
-artifact: business-flow
+title: 業務の流れ
+step: flow
 status: draft
 updated: 2026-09-18
 summary: 現状（As-Is）ではなく、システム導入後（To-Be）の流れ
@@ -11,7 +10,7 @@ questions:
   - q: 返却は社員本人が登録するのか、総務が棚に戻ったのを見て登録するのか
 ---
 
-```plantuml 業務フロー（To-Be）
+```plantuml 業務の流れ（To-Be）
 @startuml
 skinparam defaultFontSize 12
 |社員|
@@ -42,6 +41,4 @@ endif
 @enduml
 ```
 
-## 利用シーンとして残すこと
-
-- 「月曜朝の未返却確認」は価値デザインのストーリーと対応する主要シーン。
+価値のストーリー「月曜朝の未返却確認」が、この流れの催促側に対応する。

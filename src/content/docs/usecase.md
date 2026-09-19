@@ -1,15 +1,14 @@
 ---
-title: UC複合図
-layer: rdra
-artifact: uc-composite
+title: ユースケース全体
+step: usecase
 status: draft
 updated: 2026-09-18
-summary: 業務 → ユースケース → 画面／情報のつながりを 1 枚にまとめる
+summary: 業務から切り出したユースケースと、画面・情報とのつながり
 questions:
   - q: 「備品の予約」（貸出中の備品を次に借りる）は今回のスコープに入るか
 ---
 
-```plantuml UC複合図
+```plantuml ユースケース全体
 @startuml
 left to right direction
 skinparam defaultFontSize 12
@@ -24,9 +23,9 @@ rectangle "業務: 未返却の催促" #FFF3E0 {
   usecase "期限超過一覧を見る" as uc4
 }
 rectangle "画面" #E3F2FD {
-  card "備品一覧画面" as s1
-  card "備品詳細画面" as s2
-  card "貸出一覧画面" as s3
+  card "備品一覧" as s1
+  card "備品詳細" as s2
+  card "貸出一覧" as s3
 }
 rectangle "情報" #E8F5E9 {
   card "備品" as i1
@@ -49,3 +48,5 @@ uc2 ..> i2
 uc4 ..> i2
 @enduml
 ```
+
+画面名は「画面」へ、情報名は「情報」へ揃える。個別のやりとりはユースケースごとに書く。

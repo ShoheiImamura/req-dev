@@ -1,85 +1,93 @@
-# reqdev — 要件定義 最小セット サイト
+# reqdev — 要件定義
 
-お客様と図を見ながら認識の相違点を詰めるための Astro サイト。
-層は独立したフォルダではなく、**匠 → RDRA → ICONIX** が本線、RDRA の情報モデルから **TM（DB）** と **OOUI（画面）** が分岐する。
-Markdown 内の ```` ```plantuml ```` ブロックが PlantUML の図として描画される（```` ```mermaid ```` も可）。
+お客様のビジネス価値から、ユースケース／処理までを一本で辿るサイト。
+手法の名前は軸にしない（参考として各ページ末に小さく残す）。
+
+Markdown 内の ```` ```plantuml ```` ブロックが図になる。
 
 ## 使い方
 
 ```bash
 npm install
-npm run dev          # http://localhost:4321 （md を保存すると図も即時更新）
-npm run build        # dist/ に静的出力。お客様に共有するときはこれを配布
+npm run dev          # http://localhost:4321
+npm run build
 ```
+
+## 一連の流れ
+
+```
+価値 → 要求 → コンテキスト → 業務の流れ → ユースケース
+                                              ↓
+                                            情報 ⇄ 状態
+                                           ↙  ↓  ↘
+                                        画面  処理  データ
+```
+
+| 流れ | 決めること |
+|---|---|
+| 価値 | なぜ作るか |
+| 要求 | 何を実現するか |
+| コンテキスト | 誰が・どの業務で |
+| 業務の流れ | どう進むか |
+| ユースケース | システムとの接点 |
+| 情報 | 扱う名詞（正本） |
+| 状態 | 名詞の変化 |
+| 画面 | 何を見せ、何をさせるか |
+| 処理 | 画面と情報がどう動くか |
+| データ | どう残すか |
+
+名詞を増やしたくなったら、画面や表から足さず「情報」に戻る。
+
+後回し: 業務の細分割、バリエーション。クラス図は処理とデータで足りる間は書かない。
 
 ## 構成
 
 ```
-src/content/docs/<層>/<成果物>.md   図と説明。frontmatter に確認事項(questions)を書く
-src/content/notes/*.md              お客様から受領した情報 / こちらで調査した情報
-src/lib/minimal-set.ts              「必ず残すもの」の定義。トップと左メニューはここから生成
-plugins/remark-diagrams.mjs         plantuml / mermaid ブロックの変換
+src/content/docs/<step>.md          図と説明。frontmatter に確認事項(questions)
+src/content/notes/*.md              お客様から受領 / 調査。related で doc id
+src/lib/minimal-set.ts              流れ（STEPS）と受け渡し（HANDOFFS）
+plugins/remark-diagrams.mjs         plantuml / mermaid の変換
 ```
 
-| ページ | 内容 |
-|---|---|
-| `/` | 本線と分岐のパイプライン + 成果物の状態 |
-| `/docs/<層>/<成果物>` | 受け取る／渡す + 図 + 確認事項 + 根拠 + 関連メモ |
-| `/questions` | 全ドキュメントの確認事項を横断で一覧（打合せのアジェンダ用） |
-| `/notes` | 受領情報・調査メモ |
+`step` は `value | requirements | context | flow | usecase | information | state | screens | processing | data`。
+同じ step に複数ドキュメントを置いてよい（ユースケース・処理は UC ごと）。
 
 ## ドキュメントの書き方
 
 ````markdown
 ---
-title: システムコンテキスト図
-layer: rdra                 # takumi | rdra | iconix | tm | ooui
-artifact: system-context    # src/lib/minimal-set.ts のキー
+title: 情報
+step: information
 status: review              # draft | review | agreed
 updated: 2026-09-18
 questions:
-  - q: 社員マスタは人事システムから連携するか
+  - q: 個体管理か数量管理か
     asked: 2026-09-18
-  - q: 通知はメールかチャットか
-    status: resolved
-    note: チャット（9/18 打合せで決定）
 sources:
-  - title: RDRA 公式
-    url: https://www.rdra.jp/
+  - title: キックオフ打合せメモ
+    note: notes/2026-09-10-kickoff
 ---
 
-```plantuml 図のタイトル（figcaption になる）
-actor 社員
-rectangle システム
-社員 --> システム
+```plantuml 情報
+class 備品
+class 貸出
+備品 "1" -- "0..*" 貸出
 ```
 ````
 
-- `@startuml` / `@enduml` は省略可（自動で補う）。`@startmindmap` や `@startsalt` を書けばそのまま通る。
-- 図の下の「PlantUML ソース」を開くとその場でお客様と一緒に直せる。
-- 同じ成果物に複数ドキュメントを置いてよい（例: ユースケース記述を UC ごとに分ける）。`artifact` を揃えれば一覧にまとまる。
+## PlantUML の描画
 
-## PlantUML の描画先
+ビルド／dev 時に PlantUML サーバから SVG を取得し、ページにインライン展開する。
+ページに残るのは SVG だけで、図のソースや外部 URL は出力しない（dist/ を配布しても外部に依存しない）。
+取得した SVG は `.cache/plantuml/` にソースのハッシュで保存され、2 回目以降はオフラインでもビルドできる。
 
-既定では https://www.plantuml.com/plantuml に図のソースを URL で送る。
-**顧客情報を含む図はローカルサーバを使う**:
+既定のサーバは https://www.plantuml.com/plantuml で、図のソースを URL で送る。
+顧客情報を含む図はローカルサーバを使う:
 
 ```bash
-docker compose up -d                              # plantuml/plantuml-server を :8080 で起動
+docker compose up -d
 echo PLANTUML_SERVER=http://localhost:8080 > .env
 npm run dev
 ```
 
-## 最小セット
-
-| 層 | 必ず残すもの |
-|---|---|
-| 匠 | 価値デザイン、要求分析ツリー |
-| RDRA | システムコンテキスト、要求モデル、ビジネスコンテキスト、業務フローまたは利用シーン、UC複合図、情報モデル、状態モデル |
-| ICONIX | ドメインモデル、ユースケース記述、ロバストネス、シーケンス、クラス |
-| TM | T字ER（資源／事象）、対応する表 |
-| OOUI | オブジェクトの抽出、ビュー（コレクション／シングル）、アクション |
-
-RDRA のビジネスユースケース図とバリエーションは規模が出てから。
-
-サンプルは「社内備品の貸出管理」を例題にしている。実案件では中身を差し替える。
+サンプルは「社内備品の貸出管理」。実案件では中身を差し替える。

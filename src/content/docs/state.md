@@ -1,16 +1,15 @@
 ---
-title: 状態モデル：貸出
-layer: rdra
-artifact: state-model
+title: 状態
+step: state
 status: draft
 updated: 2026-09-18
-summary: 「貸出」情報の状態遷移
+summary: 「貸出」が取りうる状態と、それを動かす操作
 questions:
   - q: 貸出期間の「延長」は認めるか。認める場合、回数や上限は？
   - q: 紛失時の扱い（貸出を「紛失」で終了させるか）
 ---
 
-```plantuml 貸出の状態遷移
+```plantuml 貸出の状態
 @startuml
 skinparam defaultFontSize 13
 [*] --> 貸出中 : 借りる
@@ -23,3 +22,5 @@ skinparam defaultFontSize 13
 紛失 --> [*]
 @enduml
 ```
+
+遷移の名前（借りる／返す／延長する）が、画面のアクションと処理の操作になる。

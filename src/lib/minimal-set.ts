@@ -1,110 +1,67 @@
-// 要件定義で「必ず残す」最小セット。index と sidebar はここから生成する。
-// 層は横並びではなく、匠 → RDRA → ICONIX が本線、情報モデルから TM / OOUI が分岐する。
-export type LayerKey = 'takumi' | 'rdra' | 'iconix' | 'tm' | 'ooui';
+// お客様の価値からユースケース／処理までを一本で辿る。
+// 手法名は成果物の軸にしない。参考として STEPS[].ref に残すだけ。
+export type StepKey =
+  | 'value'
+  | 'requirements'
+  | 'context'
+  | 'flow'
+  | 'usecase'
+  | 'information'
+  | 'state'
+  | 'screens'
+  | 'processing'
+  | 'data';
 
-export interface Artifact { key: string; name: string; hint?: string }
-export interface Layer {
-  key: LayerKey;
+export interface Step {
+  key: StepKey;
   name: string;
-  artifacts: Artifact[];
-  later?: string[];
+  hint: string;
+  /** 参考にした手法・図。お客様向けの見出しには使わない。 */
+  ref?: string;
 }
 
-export const LAYERS: Layer[] = [
-  {
-    key: 'takumi', name: '匠',
-    artifacts: [
-      { key: 'value-design', name: '価値デザイン', hint: '理念・ビジョン・コンセプト・ストーリー' },
-      { key: 'requirement-tree', name: '要求分析ツリー', hint: '要求 → 要件 の分解' },
-    ],
-  },
-  {
-    key: 'rdra', name: 'RDRA',
-    artifacts: [
-      { key: 'system-context', name: 'システムコンテキスト図' },
-      { key: 'requirement-model', name: '要求モデル' },
-      { key: 'business-context', name: 'ビジネスコンテキスト図' },
-      { key: 'business-flow', name: '業務フロー／利用シーン' },
-      { key: 'uc-composite', name: 'UC複合図' },
-      { key: 'information-model', name: '情報モデル' },
-      { key: 'state-model', name: '状態モデル' },
-    ],
-    later: ['ビジネスユースケース図', 'バリエーション（規模が出てから）'],
-  },
-  {
-    key: 'iconix', name: 'ICONIX',
-    artifacts: [
-      { key: 'domain-model', name: 'ドメインモデル' },
-      { key: 'use-case-description', name: 'ユースケース記述' },
-      { key: 'robustness', name: 'ロバストネス図' },
-      { key: 'sequence', name: 'シーケンス図' },
-      { key: 'class', name: 'クラス図' },
-    ],
-  },
-  {
-    key: 'tm', name: 'TM',
-    artifacts: [
-      { key: 't-er', name: 'T字ER（資源／事象）' },
-      { key: 'tables', name: '対応する表' },
-    ],
-  },
-  {
-    key: 'ooui', name: 'OOUI',
-    artifacts: [
-      { key: 'objects', name: 'オブジェクトの抽出' },
-      { key: 'views', name: 'ビュー（コレクション／シングル）' },
-      { key: 'actions', name: 'アクション' },
-    ],
-  },
+export const STEPS: Step[] = [
+  { key: 'value', name: '価値', hint: 'なぜ作るか', ref: '匠 価値デザイン' },
+  { key: 'requirements', name: '要求', hint: '何を実現するか', ref: '匠 要求分析ツリー / RDRA 要求モデル' },
+  { key: 'context', name: 'コンテキスト', hint: '誰が・どの業務で', ref: 'RDRA システム／ビジネスコンテキスト' },
+  { key: 'flow', name: '業務の流れ', hint: 'どう進むか', ref: 'RDRA 業務フロー／利用シーン' },
+  { key: 'usecase', name: 'ユースケース', hint: 'システムとの接点', ref: 'RDRA UC複合図 / ICONIX ユースケース記述' },
+  { key: 'information', name: '情報', hint: '扱う名詞（正本）', ref: 'RDRA 情報モデル' },
+  { key: 'state', name: '状態', hint: '名詞が取りうる変化', ref: 'RDRA 状態モデル' },
+  { key: 'screens', name: '画面', hint: '何を見せ、何をさせるか', ref: 'OOUI' },
+  { key: 'processing', name: '処理', hint: '画面と情報がどう動くか', ref: 'ICONIX ロバストネス／シーケンス' },
+  { key: 'data', name: 'データ', hint: 'どう残すか', ref: 'TM（T字ER）' },
 ];
 
-/** サイドバーとパイプラインの区画。TM / OOUI は本線ではなく情報モデルからの分岐。 */
-export const LAYER_SECTIONS: { key: string; name: string; hint?: string; layers: LayerKey[] }[] = [
-  { key: 'main', name: '本線', hint: '匠 → RDRA → ICONIX', layers: ['takumi', 'rdra', 'iconix'] },
-  { key: 'branch', name: '情報モデルから分岐', hint: '名詞を DB と画面へ', layers: ['tm', 'ooui'] },
-];
+/** パイプラインの並び。価値〜UC が本線、情報をハブに画面／処理／データへ。 */
+export const SPINE = {
+  main: ['value', 'requirements', 'context', 'flow', 'usecase'] as StepKey[],
+  hub: ['information', 'state'] as StepKey[],
+  out: ['screens', 'processing', 'data'] as StepKey[],
+};
 
 export interface Handoff {
-  from: [LayerKey, string];
-  to: [LayerKey, string];
-  /** 何を渡すか（契約）。図の形ではなく、引き継ぐ中身。 */
+  from: StepKey;
+  to: StepKey;
   what: string;
 }
 
 export const HANDOFFS: Handoff[] = [
-  { from: ['takumi', 'value-design'], to: ['takumi', 'requirement-tree'], what: '理念・ビジョン（ツリーの根）' },
-  { from: ['takumi', 'requirement-tree'], to: ['rdra', 'system-context'], what: '目的と関係者の種' },
-  { from: ['takumi', 'requirement-tree'], to: ['rdra', 'requirement-model'], what: '3 段目の要件' },
-
-  { from: ['rdra', 'system-context'], to: ['rdra', 'requirement-model'], what: 'アクター' },
-  { from: ['rdra', 'requirement-model'], to: ['rdra', 'business-context'], what: '要件を満たす業務があるか' },
-  { from: ['rdra', 'business-context'], to: ['rdra', 'business-flow'], what: '業務の単位' },
-  { from: ['rdra', 'business-flow'], to: ['rdra', 'uc-composite'], what: '抽出したユースケース' },
-  { from: ['rdra', 'business-flow'], to: ['rdra', 'information-model'], what: '業務で扱う名詞' },
-  { from: ['rdra', 'uc-composite'], to: ['rdra', 'information-model'], what: 'ユースケースが操作する情報' },
-  { from: ['rdra', 'information-model'], to: ['rdra', 'state-model'], what: '状態を持つ情報' },
-
-  { from: ['rdra', 'information-model'], to: ['iconix', 'domain-model'], what: '用語と関係（精錬する。増やさない）' },
-  { from: ['rdra', 'uc-composite'], to: ['iconix', 'use-case-description'], what: 'ユースケース' },
-  { from: ['iconix', 'domain-model'], to: ['iconix', 'use-case-description'], what: 'ユビキタス言語' },
-  { from: ['iconix', 'domain-model'], to: ['iconix', 'robustness'], what: 'エンティティ' },
-  { from: ['iconix', 'use-case-description'], to: ['iconix', 'robustness'], what: '基本／代替コース' },
-  { from: ['ooui', 'views'], to: ['iconix', 'robustness'], what: 'ビュー名を Boundary に使う（画面骨格は OOUI）' },
-  { from: ['iconix', 'robustness'], to: ['iconix', 'sequence'], what: 'オブジェクトとメッセージの骨格' },
-  { from: ['iconix', 'sequence'], to: ['iconix', 'class'], what: '操作・属性' },
-  { from: ['iconix', 'domain-model'], to: ['iconix', 'class'], what: 'クラスの種' },
-  { from: ['rdra', 'state-model'], to: ['iconix', 'class'], what: '状態と遷移操作' },
-
-  { from: ['rdra', 'information-model'], to: ['tm', 't-er'], what: '名詞 → 資源／事象（画面から切らない）' },
-  { from: ['rdra', 'state-model'], to: ['tm', 't-er'], what: '状態変化 → 事象' },
-  { from: ['tm', 't-er'], to: ['tm', 'tables'], what: 'エンティティ → 表' },
-
-  { from: ['rdra', 'information-model'], to: ['ooui', 'objects'], what: '名詞 → UI オブジェクト' },
-  { from: ['ooui', 'objects'], to: ['ooui', 'views'], what: 'コレクション／シングル' },
-  { from: ['rdra', 'uc-composite'], to: ['ooui', 'views'], what: '画面アイコン → ビュー' },
-  { from: ['rdra', 'uc-composite'], to: ['ooui', 'actions'], what: 'ユースケース → オブジェクトのアクション' },
-  { from: ['ooui', 'views'], to: ['ooui', 'actions'], what: 'どのビューで実行するか' },
-  { from: ['iconix', 'use-case-description'], to: ['ooui', 'actions'], what: '操作手順の検証' },
+  { from: 'value', to: 'requirements', what: '理念が要求の根' },
+  { from: 'requirements', to: 'context', what: '誰が・どの業務で実現するか' },
+  { from: 'context', to: 'flow', what: '対象業務の流れ' },
+  { from: 'flow', to: 'usecase', what: 'システムとの接点' },
+  { from: 'flow', to: 'information', what: '業務で扱う名詞' },
+  { from: 'usecase', to: 'information', what: '操作する情報' },
+  { from: 'information', to: 'state', what: '状態を持つ情報' },
+  { from: 'information', to: 'screens', what: '名詞 → 画面のオブジェクト' },
+  { from: 'usecase', to: 'screens', what: 'ユースケース → 画面のアクション' },
+  { from: 'information', to: 'processing', what: '操作対象' },
+  { from: 'usecase', to: 'processing', what: 'このユースケースの動き' },
+  { from: 'screens', to: 'processing', what: 'ビュー名を処理の接点に使う' },
+  { from: 'state', to: 'processing', what: '遷移させる操作' },
+  { from: 'information', to: 'data', what: '名詞 → 残す単位（画面から切らない）' },
+  { from: 'state', to: 'data', what: '状態変化 → 残す出来事' },
 ];
 
 export const STATUS_LABEL: Record<string, string> = {
@@ -114,11 +71,9 @@ export const STATUS_LABEL: Record<string, string> = {
   agreed: '合意済み',
 };
 
-export const layerName = (key: string) => LAYERS.find((l) => l.key === key)?.name ?? key;
-export const artifactName = (layer: string, key: string) =>
-  LAYERS.find((l) => l.key === layer)?.artifacts.find((a) => a.key === key)?.name ?? key;
+export const stepOf = (key: string) => STEPS.find((s) => s.key === key);
+export const stepName = (key: string) => stepOf(key)?.name ?? key;
+export const stepIndex = (key: string) => STEPS.findIndex((s) => s.key === key);
 
-export const incoming = (layer: string, artifact: string) =>
-  HANDOFFS.filter((h) => h.to[0] === layer && h.to[1] === artifact);
-export const outgoing = (layer: string, artifact: string) =>
-  HANDOFFS.filter((h) => h.from[0] === layer && h.from[1] === artifact);
+export const incoming = (step: string) => HANDOFFS.filter((h) => h.to === step);
+export const outgoing = (step: string) => HANDOFFS.filter((h) => h.from === step);

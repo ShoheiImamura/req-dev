@@ -1,7 +1,6 @@
 ---
-title: 価値デザインモデル
-layer: takumi
-artifact: value-design
+title: 価値
+step: value
 status: review
 updated: 2026-09-18
 summary: 何のためにこのシステムを作るのか（例題：社内備品の貸出管理）
@@ -16,7 +15,7 @@ sources:
     note: notes/2026-09-10-kickoff
 ---
 
-```plantuml 価値デザインモデル（案）
+```plantuml 価値
 @startuml
 skinparam rectangleBackgroundColor #FFFDE7
 skinparam rectangleBorderColor #999
@@ -34,4 +33,4 @@ c -down-> s
 ## 補足
 
 - 「意義」はお客様の言葉をなるべくそのまま使う。言い換えた箇所は確認事項に残す。
-- ストーリーは代表的な 1 シーンに絞る。複数ある場合は RDRA の利用シーンへ。
+- ストーリーは代表的な 1 シーンに絞る。複数ある場合は業務の流れへ足す。

@@ -4,7 +4,7 @@ import Base from '../../layouts/Base.astro';
 import StatusBadge from '../../components/StatusBadge.astro';
 import Questions from '../../components/Questions.astro';
 import Handoffs from '../../components/Handoffs.astro';
-import { layerName, artifactName } from '../../lib/minimal-set';
+import { stepName } from '../../lib/minimal-set';
 
 export async function getStaticPaths() {
   const docs = await getCollection('docs');
@@ -18,7 +18,7 @@ const fmt = (d?: Date) => d ? d.toISOString().slice(0, 10) : '';
 ---
 <Base title={doc.data.title} currentId={doc.id}>
   <header class="doc-head">
-    <div class="crumbs">{layerName(doc.data.layer)} / {artifactName(doc.data.layer, doc.data.artifact)}</div>
+    <div class="crumbs">{stepName(doc.data.step)}</div>
     <h1>{doc.data.title} <StatusBadge status={doc.data.status} /></h1>
     <div class="meta">
       {doc.data.updated && <span>更新: {fmt(doc.data.updated)}</span>}
@@ -27,7 +27,7 @@ const fmt = (d?: Date) => d ? d.toISOString().slice(0, 10) : '';
     {doc.data.summary && <p>{doc.data.summary}</p>}
   </header>
 
-  <Handoffs layer={doc.data.layer} artifact={doc.data.artifact} docs={allDocs} currentId={doc.id} />
+  <Handoffs step={doc.data.step} docs={allDocs} currentId={doc.id} />
 
   <Content />
 

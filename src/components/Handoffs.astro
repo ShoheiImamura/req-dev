@@ -1,36 +1,42 @@
 ---
 import type { CollectionEntry } from 'astro:content';
-import { incoming, outgoing, layerName, artifactName } from '../lib/minimal-set';
+import { incoming, outgoing, stepName, stepOf } from '../lib/minimal-set';
 
 interface Props {
-  layer: string;
-  artifact: string;
+  step: string;
   docs: CollectionEntry<'docs'>[];
   currentId: string;
 }
 
-const { layer, artifact, docs, currentId } = Astro.props;
-const inH = incoming(layer, artifact);
-const outH = outgoing(layer, artifact);
+const { step, docs, currentId } = Astro.props;
+const inH = incoming(step);
+const outH = outgoing(step);
+const ref = stepOf(step)?.ref;
 
-const targets = (pair: [string, string]) =>
-  docs.filter((d) => d.data.layer === pair[0] && d.data.artifact === pair[1] && d.id !== currentId);
+const targets = (key: string) =>
+  docs.filter((d) => d.data.step === key && d.id !== currentId)
+    .sort((a, b) => a.id.length - b.id.length);
 
-const label = (pair: [string, string]) => `${layerName(pair[0])} / ${artifactName(pair[0], pair[1])}`;
+const label = (key: string, ds: CollectionEntry<'docs'>[]) => {
+  if (ds.length === 1 && ds[0].data.title !== stepName(key)) return ds[0].data.title;
+  return stepName(key);
+};
 ---
 {(inH.length > 0 || outH.length > 0) && (
-  <nav class="handoffs" aria-label="成果物の受け渡し">
+  <nav class="handoffs" aria-label="前後のつながり">
     {inH.length > 0 && (
       <div>
-        <h2>受け取る</h2>
+        <h2>前から</h2>
         <ul>
           {inH.map((h) => {
             const ds = targets(h.from);
             return (
               <li>
                 {ds.length === 0
-                  ? <span class="empty">{label(h.from)}（未作成）</span>
-                  : ds.map((d) => <a href={`/docs/${d.id}`}>{ds.length === 1 ? label(h.from) : d.data.title}</a>)}
+                  ? <span class="empty">{stepName(h.from)}（未作成）</span>
+                  : ds.length === 1
+                    ? <a href={`/docs/${ds[0].id}`}>{label(h.from, ds)}</a>
+                    : ds.map((d) => <a href={`/docs/${d.id}`}>{d.data.title}</a>)}
                 <small>{h.what}</small>
               </li>
             );
@@ -40,15 +46,17 @@ const label = (pair: [string, string]) => `${layerName(pair[0])} / ${artifactNam
     )}
     {outH.length > 0 && (
       <div>
-        <h2>渡す</h2>
+        <h2>次へ</h2>
         <ul>
           {outH.map((h) => {
             const ds = targets(h.to);
             return (
               <li>
                 {ds.length === 0
-                  ? <span class="empty">{label(h.to)}（未作成）</span>
-                  : ds.map((d) => <a href={`/docs/${d.id}`}>{ds.length === 1 ? label(h.to) : d.data.title}</a>)}
+                  ? <span class="empty">{stepName(h.to)}（未作成）</span>
+                  : ds.length === 1
+                    ? <a href={`/docs/${ds[0].id}`}>{label(h.to, ds)}</a>
+                    : ds.map((d) => <a href={`/docs/${d.id}`}>{d.data.title}</a>)}
                 <small>{h.what}</small>
               </li>
             );
@@ -56,5 +64,6 @@ const label = (pair: [string, string]) => `${layerName(pair[0])} / ${artifactNam
         </ul>
       </div>
     )}
+    {ref && <p class="handoffs-ref">参考: {ref}</p>}
   </nav>
 )}

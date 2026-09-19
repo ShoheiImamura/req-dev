@@ -1,21 +1,19 @@
 ---
-// 全ドキュメントの確認事項を横断で一覧化。お客様との打合せアジェンダに使う。
 import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import StatusBadge from '../components/StatusBadge.astro';
-import { LAYERS, layerName, artifactName } from '../lib/minimal-set';
+import { stepIndex, stepName } from '../lib/minimal-set';
 
 const docs = await getCollection('docs');
-const order = (id: string) => LAYERS.findIndex((l) => l.key === id);
 const withQ = docs
   .filter((d) => d.data.questions.length > 0)
-  .sort((a, b) => order(a.data.layer) - order(b.data.layer));
+  .sort((a, b) => stepIndex(a.data.step) - stepIndex(b.data.step));
 const openTotal = withQ.reduce((n, d) => n + d.data.questions.filter((q) => q.status === 'open').length, 0);
 const fmt = (d?: Date) => d ? d.toISOString().slice(0, 10) : '';
 ---
 <Base title="確認事項一覧">
   <h1>確認事項一覧 <span class="count">未解決 {openTotal}</span></h1>
-  <p>お客様と認識を合わせたい点をドキュメント横断でまとめたもの。解決したら各 md の <code>questions[].status</code> を <code>resolved</code> にし、<code>note</code> に決定内容を書く。</p>
+  <p>お客様と認識を合わせたい点を、流れの順にまとめたもの。解決したら各 md の <code>questions[].status</code> を <code>resolved</code> にし、<code>note</code> に決定内容を書く。</p>
 
   {withQ.length === 0 && <p class="empty">確認事項はまだありません。</p>}
 
@@ -24,7 +22,7 @@ const fmt = (d?: Date) => d ? d.toISOString().slice(0, 10) : '';
     const resolved = d.data.questions.filter((q) => q.status === 'resolved');
     return (
       <section>
-        <h2><small class="count">{layerName(d.data.layer)} / {artifactName(d.data.layer, d.data.artifact)}</small><br /><a href={`/docs/${d.id}`}>{d.data.title}</a> <StatusBadge status={d.data.status} /></h2>
+        <h2><small class="count">{stepName(d.data.step)}</small><br /><a href={`/docs/${d.id}`}>{d.data.title}</a> <StatusBadge status={d.data.status} /></h2>
         <table>
           <thead><tr><th style="width:8%">状態</th><th>確認したいこと</th><th style="width:35%">回答・決定</th><th style="width:10%">起票</th></tr></thead>
           <tbody>

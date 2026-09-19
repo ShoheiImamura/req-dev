@@ -1,47 +1,40 @@
 ---
-// 本線と分岐を一枚で見せる。層ごとの表ではなく、受け渡しの形で進捗を読む。
 import type { CollectionEntry } from 'astro:content';
-import { LAYERS, LAYER_SECTIONS, artifactName } from '../lib/minimal-set';
-import type { LayerKey } from '../lib/minimal-set';
+import { STEPS, SPINE, stepName } from '../lib/minimal-set';
+import type { StepKey } from '../lib/minimal-set';
 
 interface Props { docs: CollectionEntry<'docs'>[] }
 const { docs } = Astro.props;
 
-const docsFor = (layer: string, artifact: string) =>
-  docs.filter((d) => d.data.layer === layer && d.data.artifact === artifact);
+const docsFor = (step: string) =>
+  docs.filter((d) => d.data.step === step).sort((a, b) => a.id.length - b.id.length);
 
-const chip = (layer: LayerKey, key: string) => {
-  const ds = docsFor(layer, key);
+const chip = (step: StepKey) => {
+  const ds = docsFor(step);
   const status = ds.length === 0 ? 'todo' : ds[0].data.status;
   const href = ds[0] ? `/docs/${ds[0].id}` : undefined;
-  return { name: artifactName(layer, key), status, href };
+  const meta = STEPS.find((s) => s.key === step)!;
+  return { name: stepName(step), status, href, hint: meta.hint, hub: step === 'information' };
 };
 ---
 <section class="pipeline">
   <p class="pipeline-lead">
-    匠で「なぜ」、RDRA で「何がつながるか」、ICONIX で「どう動くか」。
-    名詞（情報モデル）だけ TM（DB）と OOUI（画面）へ分岐する。
+    お客様の価値から、ユースケースと処理までを一本で辿る。
+    名詞は「情報」が正本で、そこから画面・処理・データへ分かれる。
   </p>
 
   <div class="pipe-main">
-    {LAYER_SECTIONS[0].layers.map((layerKey, i) => {
-      const layer = LAYERS.find((l) => l.key === layerKey)!;
+    {SPINE.main.map((key, i) => {
+      const c = chip(key);
       return (
         <>
           {i > 0 && <span class="pipe-arrow" aria-hidden="true">→</span>}
-          <div class={`pipe-stage pipe-${layer.key}`}>
-            <h3>{layer.name}</h3>
-            <ul>
-              {layer.artifacts.map((a) => {
-                const c = chip(layer.key, a.key);
-                return (
-                  <li class={a.key === 'information-model' ? 'hub' : undefined}>
-                    <span class={`dot ${c.status}`}></span>
-                    {c.href ? <a href={c.href}>{c.name}</a> : <span class="empty">{c.name}</span>}
-                  </li>
-                );
-              })}
-            </ul>
+          <div class={`pipe-stage ${c.hub ? 'is-hub' : ''}`}>
+            <h3>
+              <span class={`dot ${c.status}`}></span>
+              {c.href ? <a href={c.href}>{c.name}</a> : <span class="empty">{c.name}</span>}
+            </h3>
+            <p class="pipe-hint">{c.hint}</p>
           </div>
         </>
       );
@@ -50,26 +43,40 @@ const chip = (layer: LayerKey, key: string) => {
 
   <div class="pipe-branch-row">
     <p class="pipe-branch-label">
-      <span class="pipe-from">RDRA 情報モデル・UC複合図</span>
+      <span class="pipe-from">ユースケースが扱う名詞</span>
+      <span class="pipe-arrow" aria-hidden="true">↓</span>
+    </p>
+    <div class="pipe-main">
+      {SPINE.hub.map((key, i) => {
+        const c = chip(key);
+        return (
+          <>
+            {i > 0 && <span class="pipe-arrow" aria-hidden="true">⇄</span>}
+            <div class={`pipe-stage ${c.hub ? 'is-hub' : ''}`}>
+              <h3>
+                <span class={`dot ${c.status}`}></span>
+                {c.href ? <a href={c.href}>{c.name}</a> : <span class="empty">{c.name}</span>}
+              </h3>
+              <p class="pipe-hint">{c.hint}</p>
+            </div>
+          </>
+        );
+      })}
+    </div>
+    <p class="pipe-branch-label">
+      <span class="pipe-from">情報から</span>
       <span class="pipe-arrow" aria-hidden="true">↘</span>
     </p>
     <div class="pipe-branches">
-      {LAYER_SECTIONS[1].layers.map((layerKey) => {
-        const layer = LAYERS.find((l) => l.key === layerKey)!;
+      {SPINE.out.map((key) => {
+        const c = chip(key);
         return (
-          <div class={`pipe-stage pipe-${layer.key}`}>
-            <h3>{layer.name}{layer.key === 'tm' ? '（DB）' : '（画面）'}</h3>
-            <ul>
-              {layer.artifacts.map((a) => {
-                const c = chip(layer.key, a.key);
-                return (
-                  <li>
-                    <span class={`dot ${c.status}`}></span>
-                    {c.href ? <a href={c.href}>{c.name}</a> : <span class="empty">{c.name}</span>}
-                  </li>
-                );
-              })}
-            </ul>
+          <div class="pipe-stage">
+            <h3>
+              <span class={`dot ${c.status}`}></span>
+              {c.href ? <a href={c.href}>{c.name}</a> : <span class="empty">{c.name}</span>}
+            </h3>
+            <p class="pipe-hint">{c.hint}</p>
           </div>
         );
       })}

@@ -1,14 +1,14 @@
 ---
 import { getCollection } from 'astro:content';
-import { LAYERS, LAYER_SECTIONS } from '../lib/minimal-set';
+import { STEPS } from '../lib/minimal-set';
 import '../styles/global.css';
 
 interface Props { title: string; currentId?: string }
 const { title, currentId } = Astro.props;
 
 const docs = await getCollection('docs');
-const docsFor = (layer: string, artifact: string) =>
-  docs.filter((d) => d.data.layer === layer && d.data.artifact === artifact);
+const docsFor = (step: string) =>
+  docs.filter((d) => d.data.step === step).sort((a, b) => a.id.length - b.id.length);
 const openCount = docs.reduce((n, d) => n + d.data.questions.filter((q) => q.status === 'open').length, 0);
 ---
 <!doctype html>
@@ -22,43 +22,52 @@ const openCount = docs.reduce((n, d) => n + d.data.questions.filter((q) => q.sta
   <body>
     <div class="shell">
       <nav class="side">
-        <h1><a href="/">要件定義 最小セット</a></h1>
+        <h1><a href="/">要件定義</a></h1>
         <div class="top">
           <a href="/questions">確認事項一覧 <span class="count">（未解決 {openCount}）</span></a>
           <a href="/notes">受領情報・調査メモ</a>
         </div>
-        {LAYER_SECTIONS.map((section) => (
-          <>
-            <p class="side-section">{section.name}</p>
-            {section.layers.map((key) => {
-              const layer = LAYERS.find((l) => l.key === key)!;
+        <p class="side-section">価値から処理まで</p>
+        <ol class="side-spine">
+          {STEPS.map((step) => {
+            const ds = docsFor(step.key);
+            if (ds.length === 0) {
               return (
-                <>
-                  <h2>{layer.name}</h2>
-                  <ul>
-                    {layer.artifacts.map((a) => {
-                      const ds = docsFor(layer.key, a.key);
-                      if (ds.length === 0) return <li class="todo"><span class="dot todo"></span><span>{a.name}</span></li>;
-                      return ds.map((d) => (
-                        <li class={d.id === currentId ? 'current' : ''}>
-                          <span class={`dot ${d.data.status}`}></span>
-                          <a href={`/docs/${d.id}`}>{ds.length > 1 ? d.data.title : a.name}</a>
-                        </li>
-                      ));
-                    })}
-                  </ul>
-                </>
+                <li class="todo">
+                  <span class="dot todo"></span><span>{step.name}</span>
+                </li>
               );
-            })}
-          </>
-        ))}
+            }
+            if (ds.length === 1) {
+              const d = ds[0];
+              return (
+                <li class={d.id === currentId ? 'current' : ''}>
+                  <span class={`dot ${d.data.status}`}></span>
+                  <a href={`/docs/${d.id}`}>{step.name}</a>
+                </li>
+              );
+            }
+            return (
+              <li class="group">
+                <span class="side-step">{step.name}</span>
+                <ul>
+                  {ds.map((d) => (
+                    <li class={d.id === currentId ? 'current' : ''}>
+                      <span class={`dot ${d.data.status}`}></span>
+                      <a href={`/docs/${d.id}`}>{d.data.title}</a>
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            );
+          })}
+        </ol>
       </nav>
       <main class="main">
         <slot />
       </main>
     </div>
     <script type="module" is:inline>
-      // ```mermaid ブロックがあるページだけ mermaid を CDN から読み込む
       if (document.querySelector('pre.mermaid')) {
         import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs').then(({ default: mermaid }) => {
           mermaid.initialize({ startOnLoad: false });
